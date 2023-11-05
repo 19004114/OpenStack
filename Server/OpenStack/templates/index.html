@@ -1,0 +1,141 @@
+{% extends 'base.html' %}
+
+{% block content %}
+
+	<div class="home-content">
+		<div class="content-name">
+			<span>Compute/Danh sách (Đồng bộ từ Openstack)</span>
+		</div>
+		<div class="button-listbox">
+				<div class="button-box">
+					<button type="button" class="w3-btn w3-ripple w3-light-blue" data-toggle="modal" data-target="#capquyen">Cấp quyền truy cập máy ảo</button>
+				</div>
+			</div>
+		<div class="list-text">
+
+			{% with messages = get_flashed_messages() %}
+				{% if messages %}
+					{% for message in messages %}
+						<div class="alert alert-warning alert-dismissible fade show" role="alert">
+							{{ message }}
+							<button type="button" class="close" data-dismiss="alert" aria-label="Close"> <span aria-hidden="true">&times;</span> </button>
+						</div>
+					{% endfor %}
+				{% endif %}
+			{% endwith %}
+
+			<span>Danh sách có {{ datalen }} máy tính ảo</span>
+		</div>
+		<div class="overview-boxes">
+			{% for values in data['servers'] %}
+				<form class="box">
+					<div class="right-side">
+						<div class="box-topic">
+							<span class="title">PC Name:</span>
+							<span class="detail">{{ values['name'] }}</span>
+						</div>
+						<div class="box-topic">
+							<span class="title">Trạng thái:</span>
+							{% if values['OS-EXT-STS:power_state'] == 1 %}
+								<span class="detail">RUNNING</span>
+							{% elif values['OS-EXT-STS:power_state'] == 3 %}
+								<span class="detail">PAUSED</span>
+							{% elif values['OS-EXT-STS:power_state'] == 4 %}
+								<span class="detail">SHUTDOWN</span>
+							{% elif values['OS-EXT-STS:power_state'] == 6 %}
+								<span class="detail">CRASHED</span>
+							{% elif values['OS-EXT-STS:power_state'] == 7 %}
+								<span class="detail">SUSPENDED</span>
+							{% endif %}
+						</div>
+						<div class="box-topic">
+							<span class="title">Số tài khoản:</span>
+							<span class="detail">4 (đã sử dụng 4)</span>
+						</div>
+						<div class="box-topic">
+							<span class="title">Địa chỉ IP:</span>
+							<span class="detail">{{ values['addresses']['public'][0]['addr'] }}</span>
+						</div>
+						<button type="button" class="left-btn view_data" name="view" id="{{ values['id'] }}" value="view">
+							<i class='bx bx-trash'></i>
+							<span>Cấu hình</span>
+						</button>
+						<button type="button" class="right-btn">
+							<i class='bx bx-trash'></i>
+							<span>Xóa VM</span>
+						</button>
+					</div>
+				</form>
+			{% endfor %}
+		</div>
+	</div>
+
+<!-- MODAL DATA -->
+<div class="modal fade" id="cauhinh">
+	<div class="modal-dialog modal-lg">
+		<div class="modal-content">
+			<div class="modal-header">
+				<h4 class="modal-title">Modal Heading</h4>
+				<button type="button" class="close" data-dismiss="modal">&times;</button>
+			</div>
+			<div class="modal-body">
+				<form action="{{ url_for('delete_access_vm') }}" method="post">
+					<table class="table table-striped">
+					<thead>
+					<tr>
+						<th>Tên máy vật lý</th>
+						<th>Địa chỉ MAC</th>
+						<th>User</th>
+						<th>Password</th>
+						<th>Thao Tác</th>
+					</tr>
+					</thead>
+					<tbody id="tdata">
+					</tbody>
+				</table>
+				</form>
+
+			</div>
+			<div class="modal-footer">
+				<button type="button" class="btn btn-danger" data-dismiss="modal">Đóng</button>
+			</div>
+		</div>
+	</div>
+</div>
+
+<script type="text/javascript">
+	$(document).ready(function(){
+
+		$("#cauhinh").on('hide.bs.modal', function(){
+			$("#tdata").empty();
+	  	});
+
+		$(document).on('click', '.view_data', function(){
+			var VM_id = $(this).attr("id");
+			$.ajax({
+				url:"/select",
+	   			method:"POST",
+	   			data:{VM_id:VM_id},
+	   			success:function(data){
+					$('#cauhinh').modal('show');
+					var data_rs = JSON.parse(data);
+					if (!jQuery.isEmptyObject(data_rs))
+					{
+						data_rs.forEach(function(dt){
+							$("#tdata").append("<tr>"+
+								"<td style='display:none;'><input hidden type='text' name='id' value='"+dt['id']+"'></td>"+
+								"<td>"+dt['PM_name']+"</td>"+
+								"<td>"+dt['mac_addr']+"</td>"+
+								"<td>"+dt['username']+"</td>"+
+								"<td>"+dt['password']+"</td>"+
+								"<td><button type='submit' class='btn btn-danger'>Xóa</button></td>"
+							+"</tr>"
+							);
+						});
+					}
+	   			}
+	  		});
+	 	});
+});
+</script>
+{% endblock %}
