@@ -2,11 +2,11 @@ import requests
 import json
 from API import get_token
 
-url = "http://192.168.1.8/"
-res = requests.get(url + "compute/v2.1/flavors",
+url = "http://10.18.17.50"
+res = requests.get(url + ":8774/v2.1/flavors/detail",
                     headers = {'content-type' : 'application/json',
                                'X-Auth-Token' : get_token.get()
                                },
                     )
-
-print(res.text)
+data = res.json()
+print(data['flavors'])
