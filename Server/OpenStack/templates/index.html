@@ -52,15 +52,11 @@
 						</div>
 						<div class="box-topic">
 							<span class="title">Số tài khoản:</span>
-							<span class="detail">4 (đã sử dụng 4)</span>
+							<span class="detail">2 (đã sử dụng 2)</span>
 						</div>
 						<div class="box-topic">
 							<span class="title">Địa chỉ IP:</span>
-							{% if values['addresses']['net_cloud'] |length > 1 %}
-							<span class="detail">{{ values['addresses']['net_cloud'][1]['addr'] }}</span>
-							{% else %}
-							<span class="detail"></span>
-							{% endif %}
+							<span class="detail">{{ values['addresses']['public'][0]['addr'] }}</span>
 						</div>
 						<button type="button" class="left-btn view_data" name="view" id="{{ values['id'] }}" value="view">
 							<i class='bx bx-trash'></i>
@@ -159,7 +155,7 @@
 				<div class="modal-body">
 					<div class="form-group">
 						<label><strong>Chọn máy ảo: </strong></label>
-						<select class="form-control" id="select_image" name="select_image">
+						<select class="form-control" id="select_IMG" name="select_IMG">
 							{% for img in images['images'] %}
 								<option value="{{ img['id'] }}">{{ img['name'] }}</option>
 							{% endfor %}

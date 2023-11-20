@@ -2,8 +2,8 @@ import requests
 import json
 from API import get_token
 
-url = "http://10.18.17.50"
-res = requests.get(url + ":8774/v2.1/servers/detail",
+url = "http://192.168.1.8/"
+res = requests.get(url + "compute/v2.1/servers/detail",
                     headers = {'content-type' : 'application/json',
                                'X-Auth-Token' : get_token.get()
                                },
@@ -11,6 +11,9 @@ res = requests.get(url + ":8774/v2.1/servers/detail",
 
 data = res.json()
 value = data['servers'][0]['name']
-print(data['servers'][1])
+print(data['servers'][0])
 
-print(data['servers'][1]['addresses']['net_cloud'][1]['addr'])
+for i in data['servers']:
+    print(i['name'])
+    print(i['OS-EXT-STS:power_state'])
+    print(i['addresses']['public'][0]['addr'])

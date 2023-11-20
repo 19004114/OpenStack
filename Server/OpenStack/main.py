@@ -5,7 +5,6 @@ import variables
 from datetime import datetime
 import hashlib
 import ast
-import func
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = "minh"
@@ -39,7 +38,6 @@ def login():
             session['loggedin'] = True
             session['id'] = account['id']
             session['username'] = account['username']
-            session['fullname'] = account['fullname']
             return redirect(url_for('index'))
         else:
             msg = 'Thông tin đăng nhập không chính xác !'
@@ -74,11 +72,10 @@ def index():
     if 'loggedin' in session:
         data = variables.instances_details
         datalen = len(data)
+        sidebar1 = "active"
 
         images = variables.images_details
         flavors = variables.flavors_details
-
-        sidebar1 = "active"
 
         cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
         cursor.execute('SELECT * FROM quyentruycap')
@@ -155,6 +152,8 @@ def request_access():
             mac_addr = list(select_PM.keys())[0]
             PM_name = list(select_PM.values())[0]
 
+            print(mac_addr)
+
             if not select_VM:
                 flash("Không có máy ảo để cấp quyền!")
                 return redirect(url_for('pm'))
@@ -201,16 +200,6 @@ def request_access():
         elif 'select_PM' not in request.form:
             flash("Không tìm thây máy vật lý để cấp quyền!")
         return redirect(url_for('pm'))
-
-@app.route('/delete_pm', methods =['GET', 'POST'])
-def delete_pm():
-    if request.method == 'POST' and 'id' in request.form:
-        pm_id = request.form['id']
-        cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
-        cursor.execute('DELETE FROM mayvatly WHERE id = %s', (pm_id,))
-        mysql.connection.commit()
-        flash('Xóa thành công')
-    return redirect(url_for('pm'))
 
 @app.route('/delete_access_pm', methods =['GET', 'POST'])
 def delete_access_pm():

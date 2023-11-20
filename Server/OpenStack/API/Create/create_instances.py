@@ -2,22 +2,21 @@ import requests
 import json
 from API import get_token
 
-url = "http://10.18.17.50"
-
 payload = {
-        "server": {
-            "name": "Máy",
-            "imageRef": "a6e666a3-f454-4025-9fa9-2209f54f4200",
-            "flavorRef": "01f95d4c-dfb7-4360-a99b-d11c4e6d8e93",
-            "networks": [{
-                "uuid": "b1099533-bdfc-45d3-bf76-4cdd3d5db342"
-            }],
-            "max_count": "3"
-        }
+    "server": {
+        "name": "test",
+        "imageRef": '87399d56-5f8f-481e-b4c9-75a0a090096c',
+        "flavorRef": 'c1',
+        "networks": [{
+            "uuid": "57085e72-e9f0-4305-8e7d-6fe1a9d322d7"
+        }]
     }
+}
 
-res = requests.post(url + ":8774/v2.1/servers",
-                    headers={'content-type': 'application/json',
-                             'X-Auth-Token': get_token.get()},
-                    data=json.dumps(payload)
+url = "http://192.168.1.8/"
+res = requests.post(url + "compute/v2.1/servers",
+                    headers = {'content-type' : 'application/json',
+                               'X-Auth-Token' : get_token.get()},
+                    data = json.dumps(payload)
                     )
+print(res.text)
