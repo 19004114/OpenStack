@@ -47,18 +47,19 @@ def login():
 @app.route('/register', methods =['GET', 'POST'])
 def register():
     msg = ''
-    if request.method == 'POST' and 'username' in request.form and 'password' in request.form:
+    if request.method == 'POST' and 'username' in request.form and 'password' in request.form and 'fullname' in request.form:
         username = request.form['username']
         password = request.form['password']
+        fullname = request.form['fullname']
         cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
         cursor.execute('SELECT * FROM users WHERE username = % s', (username,))
         account = cursor.fetchone()
         if account:
             msg = 'Tài khoản đã tồn tại !'
-        elif not username or not password:
+        elif not username or not password or not fullname:
             msg = 'Xin hãy điền đủ thông tin !'
         else:
-            cursor.execute('INSERT INTO users VALUES (NULL, % s, % s)', (username, password,))
+            cursor.execute('INSERT INTO users VALUES (NULL, %s, %s, %s)', (username, password, fullname,))
             mysql.connection.commit()
             msg = 'Đăng ký thành công !'
             return redirect(url_for('login'))
@@ -73,11 +74,20 @@ def index():
         datalen = len(data)
         sidebar1 = "active"
 
+        images = variables.images_details
+        flavors = variables.flavors_details
+
         cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
         cursor.execute('SELECT * FROM quyentruycap')
         pms = cursor.fetchall()
 
-        return render_template("index.html", data = data, datalen = datalen, sidebar1 = sidebar1, pms=pms)
+        return render_template("index.html",
+                               data = data,
+                               datalen = datalen,
+                               sidebar1 = sidebar1,
+                               pms = pms,
+                               images = images,
+                               flavors = flavors)
     else:
         return redirect(url_for('login'))
 
@@ -115,7 +125,12 @@ def pm():
                 cursor.execute('INSERT INTO mayvatly VALUES (NULL, %s, %s, %s)', (name, hashMAC,time_created))
                 mysql.connection.commit()
                 msg = 'Thêm thành công !'
-        return render_template("PM.html", data = data, msg=msg, sidebar2 = sidebar2, pms = pms, request_access = request_access)
+        return render_template("PM.html",
+                               data = data,
+                               msg=msg,
+                               sidebar2 = sidebar2,
+                               pms = pms,
+                               request_access = request_access)
     else:
         return redirect(url_for('login'))
 
@@ -233,3 +248,38 @@ def select():
             PM_list.append(PM_dict)
         print(PM_list)
         return json.dumps(PM_list)
+
+@app.route('/create_vm', methods=['GET', 'POST'])
+def create_vm():
+    if request.method == 'POST' and 'VM_number' in request.form and 'select_image' in request.form and 'select_flavor' in request.form:
+        vm_num = request.form['VM_number']
+        select_image = request.form['select_image']
+        select_flavor = request.form['select_flavor']
+        data = variables.instances_details
+        datalen = len(data['servers'])
+        if (10 - datalen - int(vm_num)) > 0:
+            func.create_vm(vm_num, select_image, select_flavor)
+            flash("Thêm thành công")
+            return redirect(url_for('index'))
+        else:
+            flash("Vượt quá số lượng máy ảo. Không thể thêm!")
+            return redirect(url_for('index'))
+    elif 'select_image' not in request.form:
+        flash("Không có hệ điều hành để tạo!")
+        return redirect(url_for('index'))
+    elif 'vm_num' not in request.form:
+        flash("Chưa chọn số lượng máy cần tạo!")
+        return redirect(url_for('index'))
+    elif 'select_flavor' not in request.form:
+        flash("Chưa chọn phần cứng!")
+        return redirect(url_for('index'))
+    return redirect(url_for('index'))
+
+@app.route('/get_access/<mac_addr>', methods=['GET', 'POST'])
+def get_access(mac_addr):
+    cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
+    cursor.execute('SELECT * FROM quyentruycap WHERE mac_addr = %s', (mac_addr,))
+    data = cursor.fetchone()
+    if data:
+        return data
+    return {}

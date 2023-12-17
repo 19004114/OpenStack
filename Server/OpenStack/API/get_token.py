@@ -14,15 +14,15 @@ def get():
                         "domain": {
                             "name": "Default"
                         },
-                        "password": "minh"
+                        "password": "123"
                     }
                 }
             }
         }
     }
-    url = "http://192.168.1.8/"
+    url = "http://10.18.17.50"
     try:
-        res = requests.post(url + "identity/v3/auth/tokens",
+        res = requests.post(url + ":5000/v3/auth/tokens",
                             headers={'content-type': 'application/json'},
                             data=json.dumps(payload))
     except:
